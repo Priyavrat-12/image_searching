@@ -1,14 +1,15 @@
 package com.dev.imagesearching.api;
 
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 
-import okhttp3.internal.http.CallServerInterceptor;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static com.dev.imagesearching.utils.NetworkConstants.BASE_ENDPOINT_URL;
+
 /**
- * (c) . All rights are reserved.
+ * (c) All rights are reserved.
  *
  * This class prepares the initial Networking API(Retrofit) object which is needed to make the REST API call.
  */
@@ -26,14 +27,14 @@ public class ApiClient {
      * Method to prepare retrofit API instance, with request URL, response converter etc.
      */
     private void prepareRetrofitInstance() {
-        HttpLog interceptor = new CallServerInterceptor();
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         OkHttpClient httpClient = new OkHttpClient.Builder().addInterceptor(interceptor).build();
 
         sRetrofit = new Retrofit.Builder()
-                .baseUrl(WEATHER_APP_REQUEST_URL)
+                .baseUrl(BASE_ENDPOINT_URL)
                 .client(httpClient)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create()) // Adding the GSON converter, response will be mapped GSON ->> POJO.
                 .build();
     }
 
@@ -50,6 +51,9 @@ public class ApiClient {
         return sApiClient;
     }
 
+    /**
+     * To create and return the API interface object.
+     */
     public RemoteApiInterface getApiInterface() {
         return sRetrofit.create(RemoteApiInterface.class);
     }

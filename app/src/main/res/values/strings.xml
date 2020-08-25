@@ -1,4 +1,9 @@
 <resources>
-    <string name="app_name">ImageSearching</string>
+    <string name="app_name">Image Searching App</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_image_detail">ImageDetailActivity</string>
+    <string name="search_view_text">Search Images&#8230;</string>
+    <string name="default_empty_msg">Images data is not available.</string>
+    <string name="add_comment_hint">Write Comment here</string>
+    <string name="add_comment_btn_text">Add Comment</string>
 </resources>
