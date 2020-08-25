@@ -1,0 +1,11 @@
+com.dev.imagesearching
+com.dev.imagesearching.api
+com.dev.imagesearching.db
+com.dev.imagesearching.db.dao
+com.dev.imagesearching.db.entities
+com.dev.imagesearching.models
+com.dev.imagesearching.repositories
+com.dev.imagesearching.utils
+com.dev.imagesearching.viewmodels
+com.dev.imagesearching.views.activities
+com.dev.imagesearching.views.adapters
