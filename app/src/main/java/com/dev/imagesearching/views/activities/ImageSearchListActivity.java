@@ -11,6 +11,7 @@ import android.widget.ProgressBar;
 import com.dev.imagesearching.R;
 import com.dev.imagesearching.models.Data;
 import com.dev.imagesearching.models.ImagesResponse;
+import com.dev.imagesearching.utils.AppUtils;
 import com.dev.imagesearching.utils.DebouncedQueryTextListener;
 import com.dev.imagesearching.utils.RecyclerItemClickListener;
 import com.dev.imagesearching.utils.WrapContentGridLayoutManager;
@@ -22,6 +23,7 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SearchView;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -90,8 +92,14 @@ public class ImageSearchListActivity extends BaseActivity {
             navigateToDetailActivity(position);
         }));
 
+        // Initializing the view model.
+        mImageSearchingViewModel =  new ViewModelProvider(this).get(ImageSearchingViewModel.class);
+
         // Setting up the adapter to images grid recycler view.
-        mImageRecyclerViewAdapter = new ImagesGridRecyclerViewAdapter(ImageSearchListActivity.this);
+
+        // Initializing the adapter with the observable data list, so that data changes can reflect directly, even without notifying the adapter for data set changes.
+        List<Data> recyclerViewDataList = mImageSearchingViewModel.getRecyclerViewDataList();
+        mImageRecyclerViewAdapter = new ImagesGridRecyclerViewAdapter(ImageSearchListActivity.this, recyclerViewDataList);
         mImageListRecyclerView.setAdapter(mImageRecyclerViewAdapter);
 
         // Setting up the observer to listen the network updates.
@@ -100,10 +108,11 @@ public class ImageSearchListActivity extends BaseActivity {
 
     @Override
     public void setObservers() {
-        // Adding observer to listen the data retrieval updates and based on that refresh the images grid recycler view.
-        mImageSearchingViewModel =  new ViewModelProvider(this).get(ImageSearchingViewModel.class);
 
-        mImageSearchingViewModel.getImagesObservableData().observe(this, (Observer<ImagesResponse>) imagesResponse -> {
+        // Adding observer to listen the data retrieval updates and based on that refresh the images grid recycler view.
+        MutableLiveData<ImagesResponse> imagesLiveData = mImageSearchingViewModel.getImagesObservableData();
+
+        imagesLiveData.observe(this, (Observer<ImagesResponse>) imagesResponse -> {
 
             mIsLoading = false;
 
@@ -120,10 +129,18 @@ public class ImageSearchListActivity extends BaseActivity {
 
                 Log.e("ImageSearching", "Setting up data to adapter.");
 
+                // Hiding the soft input keyboard, if opened.
+                AppUtils.hideKeyboard(ImageSearchListActivity.this, mSearchView);
+
                 // If the images data list is not null/ empty, then only try to update the adapter.
                 List<Data> imagesDataList = imagesResponse.getDataList();
                 if (null != imagesDataList && !imagesDataList.isEmpty()) {
-                    mImageRecyclerViewAdapter.addDataToList(imagesDataList);
+
+                    // Adding the data to persisted data list under the view model.
+                    mImageSearchingViewModel.addObjectsToRecyclerViewDataList(imagesDataList);
+
+                    // Resetting the value to images live data, otherwise it will be keep positing the same data when the next UI controller is attached.
+                    imagesLiveData.setValue(null);
                 }
             }
         });

@@ -32,8 +32,8 @@ public class ImagesGridRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
     public static final int VIEW_TYPE_IMAGE_LAYOUT = 0; // For images layout.
     public static final int VIEW_TYPE_LOADING = 1; // For the paginated loading view.
 
-    public ImagesGridRecyclerViewAdapter (final Context context) {
-        mImagesDataList = new ArrayList<>();
+    public ImagesGridRecyclerViewAdapter (@NonNull final Context context, @NonNull final List<Data> imagesDataList) {
+        mImagesDataList = imagesDataList;
         mContext = context;
     }
 
@@ -79,18 +79,6 @@ public class ImagesGridRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
     @Override
     public int getItemViewType(int position) {
         return null == mImagesDataList.get(position) ? VIEW_TYPE_LOADING : VIEW_TYPE_IMAGE_LAYOUT;
-    }
-
-    public void addDataToList (List<Data> imagesDataList) {
-
-        // As a safetyNet, initialize the images data list if null.
-        if (null == mImagesDataList) {
-            mImagesDataList = new ArrayList<>();
-        }
-
-        // Appending the provided results into original data list.
-        mImagesDataList.addAll(imagesDataList);
-        notifyDataSetChanged();
     }
 
     /**

@@ -2,8 +2,12 @@ package com.dev.imagesearching.viewmodels;
 
 import android.app.Application;
 
+import com.dev.imagesearching.models.Data;
 import com.dev.imagesearching.models.ImagesResponse;
 import com.dev.imagesearching.repositories.ImagesDataRepository;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -35,9 +39,14 @@ import static com.dev.imagesearching.utils.NetworkConstants.UNKNOWN_FAILURE;
  */
 public class ImageSearchingViewModel extends AndroidViewModel {
 
+    // For holding the freshly loaded images data responses.
     private MutableLiveData<ImagesResponse> mImagesResponseLiveData;
 
+    // To notify about the network errors received.
     private MutableLiveData<Integer> mNetworkErrorCodeLiveData;
+
+    // To persist the recycler view data items.
+    private MutableLiveData<List<Data>> mImageRecyclerViewLiveData = new MutableLiveData<>();
 
     public ImageSearchingViewModel (@NonNull Application application) {
         super(application);
@@ -55,6 +64,9 @@ public class ImageSearchingViewModel extends AndroidViewModel {
         // Initializing the observers related to network operations.
         mImagesResponseLiveData = imageDataRepository.getImagesResponseObservable();
         mNetworkErrorCodeLiveData = imageDataRepository.getNetworkFailureCodeObservable();
+
+        // Initializing recycler view data items list.
+        mImageRecyclerViewLiveData = new MutableLiveData<>(new ArrayList<>());
     }
 
     /**
@@ -99,6 +111,32 @@ public class ImageSearchingViewModel extends AndroidViewModel {
      */
     public MutableLiveData<ImagesResponse> getImagesObservableData () {
         return mImagesResponseLiveData;
+    }
+
+    /**
+     * Method to keep/ persist the recyclerview data list, which will intact w.r.t configuration changes.
+     * @param newItems newly loaded items will be added to recyclerview data list.
+     */
+    public void addObjectsToRecyclerViewDataList (List<Data> newItems) {
+
+        if (null != newItems && !newItems.isEmpty()) {
+            List<Data> existingDataList = mImageRecyclerViewLiveData.getValue();
+
+            // Adding the newly loaded data items to recycler view data list,
+            // Since it uses the live data, so need not to notify the adapter for the dataset changed.
+            if (null != existingDataList) {
+                existingDataList.addAll(newItems);
+                mImageRecyclerViewLiveData.setValue(existingDataList);
+            }
+        }
+    }
+
+    /**
+     * To return the persisted data list used by recycler view.
+     * @return this list is used by recycler view adapter to display the results.
+     */
+    public List<Data> getRecyclerViewDataList () {
+        return mImageRecyclerViewLiveData.getValue();
     }
 
     /**
